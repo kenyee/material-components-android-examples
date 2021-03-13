@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
+import com.google.android.material.navigationrail.NavigationRailView
 import com.google.android.material.transition.MaterialElevationScale
 import com.google.android.material.transition.MaterialFadeThrough
 import com.google.android.material.transition.MaterialSharedAxis
@@ -55,18 +56,19 @@ import kotlin.LazyThreadSafetyMode.NONE
 class MainActivity : AppCompatActivity(),
                      Toolbar.OnMenuItemClickListener,
                      NavController.OnDestinationChangedListener,
-                     NavigationAdapter.NavigationAdapterListener {
+                     NavigationAdapter.NavigationAdapterListener,
+                     NavigationRailView.OnNavigationItemSelectedListener {
 
     private val binding: ActivityMainBinding by contentView(R.layout.activity_main)
-    private val bottomNavDrawer: BottomNavDrawerFragment by lazy(NONE) {
-        supportFragmentManager.findFragmentById(R.id.bottom_nav_drawer) as BottomNavDrawerFragment
+    private val bottomNavDrawer: BottomNavDrawerFragment? by lazy(NONE) {
+        supportFragmentManager.findFragmentById(R.id.bottom_nav_drawer) as? BottomNavDrawerFragment
     }
 
     // Keep track of the current Email being viewed, if any, in order to pass the correct email id
     // to ComposeFragment when this Activity's FAB is clicked.
     private var currentEmailId = -1L
 
-    val currentNavigationFragment: Fragment?
+    private val currentNavigationFragment: Fragment?
         get() = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
                 ?.childFragmentManager
                 ?.fragments
@@ -87,7 +89,7 @@ class MainActivity : AppCompatActivity(),
         }
 
         // Set a custom animation for showing and hiding the FAB
-        binding.fab.apply {
+        binding.fab?.apply {
             setShowMotionSpecResource(R.animator.fab_show)
             setHideMotionSpecResource(R.animator.fab_hide)
             setOnClickListener {
@@ -95,35 +97,40 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-        bottomNavDrawer.apply {
-            addOnSlideAction(HalfClockwiseRotateSlideAction(binding.bottomAppBarChevron))
-            addOnSlideAction(AlphaSlideAction(binding.bottomAppBarTitle, true))
-            addOnStateChangedAction(ShowHideFabStateAction(binding.fab))
+        bottomNavDrawer?.apply {
+            addOnSlideAction(HalfClockwiseRotateSlideAction(binding.bottomAppBarChevron!!))
+            addOnSlideAction(AlphaSlideAction(binding.bottomAppBarTitle!!, true))
+            addOnStateChangedAction(ShowHideFabStateAction(binding.fab!!))
             addOnStateChangedAction(ChangeSettingsMenuStateAction { showSettings ->
                 // Toggle between the current destination's BAB menu and the menu which should
                 // be displayed when the BottomNavigationDrawer is open.
-                binding.bottomAppBar.replaceMenu(if (showSettings) {
+                binding.bottomAppBar?.replaceMenu(if (showSettings) {
                     R.menu.bottom_app_bar_settings_menu
                 } else {
                     getBottomAppBarMenuForDestination()
                 })
             })
 
-            addOnSandwichSlideAction(HalfCounterClockwiseRotateSlideAction(binding.bottomAppBarChevron))
+            addOnSandwichSlideAction(HalfCounterClockwiseRotateSlideAction(binding.bottomAppBarChevron!!))
             addNavigationListener(this@MainActivity)
         }
 
         // Set up the BottomAppBar menu
-        binding.bottomAppBar.apply {
+        binding.bottomAppBar?.apply {
             setNavigationOnClickListener {
-                bottomNavDrawer.toggle()
+                bottomNavDrawer?.toggle()
             }
             setOnMenuItemClickListener(this@MainActivity)
         }
 
         // Set up the BottomNavigationDrawer's open/close affordance
-        binding.bottomAppBarContentContainer.setOnClickListener {
-            bottomNavDrawer.toggle()
+        binding.bottomAppBarContentContainer?.setOnClickListener {
+            bottomNavDrawer?.toggle()
+        }
+
+        // set up the NavigationRailView
+        binding.navigationRail?.apply {
+            setOnNavigationItemSelectedListener(this@MainActivity)
         }
     }
 
@@ -177,25 +184,35 @@ class MainActivity : AppCompatActivity(),
 
     private fun setBottomAppBarForHome(@MenuRes menuRes: Int) {
         binding.run {
-            fab.setImageState(intArrayOf(-android.R.attr.state_activated), true)
-            bottomAppBar.visibility = View.VISIBLE
-            bottomAppBar.replaceMenu(menuRes)
-            fab.contentDescription = getString(R.string.fab_compose_email_content_description)
-            bottomAppBarTitle.visibility = View.VISIBLE
-            bottomAppBar.performShow()
-            fab.show()
+            fab?.apply {
+                setImageState(intArrayOf(-android.R.attr.state_activated), true)
+
+                contentDescription = getString(R.string.fab_compose_email_content_description)
+                show()
+            }
+
+            bottomAppBar?.apply {
+                visibility = View.VISIBLE
+                replaceMenu(menuRes)
+                bottomAppBarTitle?.visibility = View.VISIBLE
+                performShow()
+            }
         }
     }
 
     private fun setBottomAppBarForEmail(@MenuRes menuRes: Int) {
         binding.run {
-            fab.setImageState(intArrayOf(android.R.attr.state_activated), true)
-            bottomAppBar.visibility = View.VISIBLE
-            bottomAppBar.replaceMenu(menuRes)
-            fab.contentDescription = getString(R.string.fab_reply_email_content_description)
-            bottomAppBarTitle.visibility = View.INVISIBLE
-            bottomAppBar.performShow()
-            fab.show()
+            fab?.apply {
+                setImageState(intArrayOf(android.R.attr.state_activated), true)
+                contentDescription = getString(R.string.fab_reply_email_content_description)
+                show()
+            }
+            bottomAppBar?.apply {
+                visibility = View.VISIBLE
+                replaceMenu(menuRes)
+                bottomAppBarTitle?.visibility = View.INVISIBLE
+                performShow()
+            }
         }
     }
 
@@ -205,28 +222,31 @@ class MainActivity : AppCompatActivity(),
 
     private fun setBottomAppBarForSearch() {
         hideBottomAppBar()
-        binding.fab.hide()
+        binding.fab?.hide()
     }
 
     private fun hideBottomAppBar() {
         binding.run {
-            bottomAppBar.performHide()
-            // Get a handle on the animator that hides the bottom app bar so we can wait to hide
-            // the fab and bottom app bar until after it's exit animation finishes.
-            bottomAppBar.animate().setListener(object : AnimatorListenerAdapter() {
-                var isCanceled = false
-                override fun onAnimationEnd(animation: Animator?) {
-                    if (isCanceled) return
+            bottomAppBar?.apply {
+                performHide()
+                // Get a handle on the animator that hides the bottom app bar so we can wait to hide
+                // the fab and bottom app bar until after it's exit animation finishes.
+                animate().setListener(object : AnimatorListenerAdapter() {
+                    var isCanceled = false
+                    override fun onAnimationEnd(animation: Animator?) {
+                        if (isCanceled) return
 
-                    // Hide the BottomAppBar to avoid it showing above the keyboard
-                    // when composing a new email.
-                    bottomAppBar.visibility = View.GONE
-                    fab.visibility = View.INVISIBLE
-                }
-                override fun onAnimationCancel(animation: Animator?) {
-                    isCanceled = true
-                }
-            })
+                        // Hide the BottomAppBar to avoid it showing above the keyboard
+                        // when composing a new email.
+                        visibility = View.GONE
+                        fab?.visibility = View.INVISIBLE
+                    }
+
+                    override fun onAnimationCancel(animation: Animator?) {
+                        isCanceled = true
+                    }
+                })
+            }
         }
     }
 
@@ -242,7 +262,7 @@ class MainActivity : AppCompatActivity(),
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.menu_settings -> {
-                bottomNavDrawer.close()
+                bottomNavDrawer?.close()
                 showDarkThemeMenu()
             }
             R.id.menu_search -> navigateToSearch()
@@ -264,7 +284,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     fun navigateToHome(@StringRes titleRes: Int, mailbox: Mailbox) {
-        binding.bottomAppBarTitle.text = getString(titleRes)
+        binding.bottomAppBarTitle?.text = getString(titleRes)
         currentNavigationFragment?.apply {
             exitTransition = MaterialFadeThrough().apply {
                 duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
@@ -314,6 +334,10 @@ class MainActivity : AppCompatActivity(),
 
         delegate.localNightMode = nightMode
         return true
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        TODO("Not yet implemented")
     }
 
 }
