@@ -16,12 +16,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-<!--  app:layoutFullscreen="@{true}" -->
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <LinearLayout
         android:id="@+id/coordinator_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:layoutFullscreen="@{true}"
+        android:orientation="horizontal"
         tools:context="com.materialstudies.reply.ui.MainActivity">
 
         <com.google.android.material.navigationrail.NavigationRailView
@@ -33,8 +34,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/nav_host_fragment"
-            app:headerLayout="@layout/navigation_rail_fab"
-            app:menu="@menu/navigation_rail_menu" />
+            app:headerLayout="@layout/navigation_rail_header"
+            app:menu="@menu/navigation_rail_menu"
+            style="@style/Widget.App.NavigationRailView" />
 
         <fragment
             android:id="@+id/nav_host_fragment"
@@ -49,6 +51,12 @@
             app:defaultNavHost="true"
             app:navGraph="@navigation/navigation_graph"/>
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/nav_detail"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+    </LinearLayout>
 
 </layout>
