@@ -337,7 +337,27 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        TODO("Not yet implemented")
+        val mailbox = when (item.itemId) {
+            R.id.navigation_inbox ->
+                Mailbox.INBOX
+            R.id.navigation_starred ->
+                Mailbox.STARRED
+            R.id.navigation_sent ->
+                Mailbox.SENT
+            R.id.navigation_drafts ->
+                Mailbox.DRAFTS
+            R.id.navigation_spam ->
+                Mailbox.SPAM
+            R.id.navigation_trash ->
+                Mailbox.TRASH
+            else ->
+                null
+        }
+        mailbox?.let {
+            val directions = HomeFragmentDirections.actionGlobalHomeFragment(it)
+            findNavController(R.id.nav_host_fragment).navigate(directions)
+            return true
+        }
+        return false
     }
-
 }

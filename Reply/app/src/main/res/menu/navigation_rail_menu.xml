@@ -19,7 +19,7 @@
         android:title="@string/navigation_sent"
         app:labelVisibilityMode="unlabeled"/>
     <item
-        android:id="@+id/navigation_delete"
+        android:id="@+id/navigation_trash"
         android:enabled="true"
         android:icon="@drawable/ic_twotone_delete"
         android:title="@string/navigation_trash"
