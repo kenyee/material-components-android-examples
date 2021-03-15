@@ -36,4 +36,12 @@
         <item name="android:checkable">false</item>
     </style>
 
+    <style name="Widget.App.NavigationRailView" parent="Widget.MaterialComponents.NavigationRailView.Colored">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.NavigationRailView</item>
+    </style>
+    <style name="ThemeOverlay.App.NavigationRailView" parent="">
+        <item name="colorPrimary">@color/reply_blue_800</item>
+        <item name="colorOnPrimary">@color/reply_blue_200</item>
+    </style>
+
 </resources>

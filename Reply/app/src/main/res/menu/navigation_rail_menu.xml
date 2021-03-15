@@ -1,32 +1,39 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/navigation_inbox"
         android:enabled="true"
         android:icon="@drawable/ic_twotone_inbox"
-        android:title="@string/navigation_inbox"/>
+        android:title="@string/navigation_inbox"
+        app:labelVisibilityMode="unlabeled" />
     <item
         android:id="@+id/navigation_starred"
         android:enabled="true"
         android:icon="@drawable/ic_twotone_star"
-        android:title="@string/navigation_starred"/>
+        android:title="@string/navigation_starred"
+        app:labelVisibilityMode="unlabeled"/>
     <item
         android:id="@+id/navigation_sent"
         android:enabled="true"
         android:icon="@drawable/ic_twotone_send"
-        android:title="@string/navigation_sent"/>
+        android:title="@string/navigation_sent"
+        app:labelVisibilityMode="unlabeled"/>
     <item
         android:id="@+id/navigation_delete"
         android:enabled="true"
         android:icon="@drawable/ic_twotone_delete"
-        android:title="@string/navigation_trash"/>
+        android:title="@string/navigation_trash"
+        app:labelVisibilityMode="unlabeled"/>
     <item
         android:id="@+id/navigation_spam"
         android:enabled="true"
         android:icon="@drawable/ic_twotone_error"
-        android:title="@string/navigation_spam"/>
+        android:title="@string/navigation_spam"
+        app:labelVisibilityMode="unlabeled"/>
     <item
         android:id="@+id/navigation_drafts"
         android:enabled="true"
         android:icon="@drawable/ic_twotone_drafts"
-        android:title="@string/navigation_drafts"/>
+        android:title="@string/navigation_drafts"
+        app:labelVisibilityMode="unlabeled"/>
 </menu>

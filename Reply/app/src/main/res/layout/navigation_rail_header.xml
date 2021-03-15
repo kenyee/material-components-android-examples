@@ -12,7 +12,7 @@
         android:layout_height="48dp"
         android:layout_marginBottom="16dp"
         app:srcCompat="@drawable/ic_reply_logo"
-        app:tint="?attr/colorOnSecondary"
+        app:tint="@color/reply_blue_200"
         android:contentDescription="@string/bottom_app_bar_logo_content_desc"/>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
