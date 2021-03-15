@@ -19,7 +19,7 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:id="@+id/coordinator_layout"
+        android:id="@+id/main_layout"
         android:layout_height="match_parent"
         app:layoutFullscreen="@{true}"
         tools:context="com.materialstudies.reply.ui.MainActivity">
