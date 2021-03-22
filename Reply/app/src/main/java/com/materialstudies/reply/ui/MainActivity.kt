@@ -30,15 +30,18 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.navigationrail.NavigationRailView
 import com.google.android.material.transition.MaterialElevationScale
 import com.google.android.material.transition.MaterialFadeThrough
 import com.google.android.material.transition.MaterialSharedAxis
 import com.materialstudies.reply.R
+import com.materialstudies.reply.data.Email
 import com.materialstudies.reply.data.EmailStore
 import com.materialstudies.reply.databinding.ActivityMainBinding
 import com.materialstudies.reply.ui.compose.ComposeFragmentDirections
 import com.materialstudies.reply.ui.email.EmailFragmentArgs
+import com.materialstudies.reply.ui.home.EmailAdapter
 import com.materialstudies.reply.ui.home.HomeFragmentDirections
 import com.materialstudies.reply.ui.home.Mailbox
 import com.materialstudies.reply.ui.nav.AlphaSlideAction
@@ -57,7 +60,9 @@ class MainActivity : AppCompatActivity(),
                      Toolbar.OnMenuItemClickListener,
                      NavController.OnDestinationChangedListener,
                      NavigationAdapter.NavigationAdapterListener,
-                     NavigationRailView.OnNavigationItemSelectedListener {
+                     NavigationRailView.OnNavigationItemSelectedListener,
+                     EmailAdapter.EmailNavigationListener
+{
 
     private val binding: ActivityMainBinding by contentView(R.layout.activity_main)
     private val bottomNavDrawer: BottomNavDrawerFragment? by lazy(NONE) {
@@ -73,6 +78,10 @@ class MainActivity : AppCompatActivity(),
                 ?.childFragmentManager
                 ?.fragments
                 ?.first()
+
+    private val detailNavHostFragment: NavHostFragment? by lazy {
+        supportFragmentManager.findFragmentById(R.id.nav_host_detail_fragment) as? NavHostFragment
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,9 +107,15 @@ class MainActivity : AppCompatActivity(),
         }
 
         bottomNavDrawer?.apply {
-            addOnSlideAction(HalfClockwiseRotateSlideAction(binding.bottomAppBarChevron!!))
-            addOnSlideAction(AlphaSlideAction(binding.bottomAppBarTitle!!, true))
-            addOnStateChangedAction(ShowHideFabStateAction(binding.fab!!))
+            binding.bottomAppBarChevron?.let {
+                addOnSlideAction(HalfClockwiseRotateSlideAction(it))
+            }
+            binding.bottomAppBarTitle?.let {
+                addOnSlideAction(AlphaSlideAction(it, true))
+            }
+            binding.fab?.let {
+                addOnStateChangedAction(ShowHideFabStateAction(it))
+            }
             addOnStateChangedAction(ChangeSettingsMenuStateAction { showSettings ->
                 // Toggle between the current destination's BAB menu and the menu which should
                 // be displayed when the BottomNavigationDrawer is open.
@@ -111,7 +126,9 @@ class MainActivity : AppCompatActivity(),
                 })
             })
 
-            addOnSandwichSlideAction(HalfCounterClockwiseRotateSlideAction(binding.bottomAppBarChevron!!))
+            binding.bottomAppBarChevron?.let {
+                addOnSandwichSlideAction(HalfCounterClockwiseRotateSlideAction(it))
+            }
             addNavigationListener(this@MainActivity)
         }
 
@@ -359,5 +376,13 @@ class MainActivity : AppCompatActivity(),
             return true
         }
         return false
+    }
+
+    override fun onEmailClicked(email: Email) {
+        detailNavHostFragment?.let {
+            it.navController.navigate(R.id.emailFragment, Bundle().apply {
+                putLong("emailId", email.id)
+            })
+        }
     }
 }

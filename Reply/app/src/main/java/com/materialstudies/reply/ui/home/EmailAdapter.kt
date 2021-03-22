@@ -38,6 +38,10 @@ class EmailAdapter(
         fun onEmailArchived(email: Email)
     }
 
+    interface EmailNavigationListener {
+        fun onEmailClicked(email: Email)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmailViewHolder {
         return EmailViewHolder(
             EmailItemLayoutBinding.inflate(

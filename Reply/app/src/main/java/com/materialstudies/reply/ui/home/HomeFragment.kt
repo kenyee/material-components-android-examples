@@ -47,6 +47,10 @@ class HomeFragment : Fragment(), EmailAdapter.EmailAdapterListener {
 
     private lateinit var binding: FragmentHomeBinding
 
+    private val isDualPane: Boolean by lazy {
+        requireContext().resources.getBoolean(R.bool.isTablet)
+    }
+
     private val emailAdapter = EmailAdapter(this)
 
     // An on back pressed callback that handles replacing any non-Inbox HomeFragment with inbox
@@ -55,7 +59,7 @@ class HomeFragment : Fragment(), EmailAdapter.EmailAdapterListener {
         override fun handleOnBackPressed() {
             NavigationModel.setNavigationMenuItemChecked(NavigationModel.INBOX_ID)
             (requireActivity() as MainActivity)
-                .navigateToHome(R.string.navigation_inbox, Mailbox.INBOX);
+                .navigateToHome(R.string.navigation_inbox, Mailbox.INBOX)
         }
     }
 
@@ -70,7 +74,7 @@ class HomeFragment : Fragment(), EmailAdapter.EmailAdapterListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -97,8 +101,13 @@ class HomeFragment : Fragment(), EmailAdapter.EmailAdapterListener {
         }
         binding.recyclerView.adapter = emailAdapter
 
-        EmailStore.getEmails(args.mailbox).observe(viewLifecycleOwner) {
-            emailAdapter.submitList(it)
+        EmailStore.getEmails(args.mailbox).observe(viewLifecycleOwner) { emailList ->
+            val firstLoad = emailAdapter.itemCount == 0
+            emailAdapter.submitList(emailList)
+            if (emailList.isNotEmpty() && firstLoad && isDualPane) {
+                val firstEmail = emailList[0]
+                (requireActivity() as? EmailAdapter.EmailNavigationListener)?.onEmailClicked(firstEmail)
+            }
         }
     }
 
@@ -113,8 +122,14 @@ class HomeFragment : Fragment(), EmailAdapter.EmailAdapterListener {
         }
         val emailCardDetailTransitionName = getString(R.string.email_card_detail_transition_name)
         val extras = FragmentNavigatorExtras(cardView to emailCardDetailTransitionName)
-        val directions = HomeFragmentDirections.actionHomeFragmentToEmailFragment(email.id)
-        findNavController().navigate(directions, extras)
+
+        if (isDualPane) {
+            // tell enclosing activity to handle the navigation of the detail fragment
+            (requireActivity() as? EmailAdapter.EmailNavigationListener)?.onEmailClicked(email)
+        } else {
+            val directions = HomeFragmentDirections.actionHomeFragmentToEmailFragment(email.id)
+            findNavController().navigate(directions, extras)
+        }
     }
 
     override fun onEmailLongPressed(email: Email): Boolean {
